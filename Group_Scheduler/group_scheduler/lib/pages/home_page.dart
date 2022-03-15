@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:group_scheduler/pages/login_page.dart';
+import 'package:group_scheduler/services/auth_service.dart';
 
 // 자체제작 서비스
 import 'package:group_scheduler/services/diary_service.dart';
@@ -38,98 +40,123 @@ class _HomePageState extends State<HomePage> {
           // 키보드가 올라올 때 화면 밀지 않도록 만들기(overflow 방지)
           resizeToAvoidBottomInset: false,
           body: SafeArea(
-            child: Column(
-              children: [
-                /// 달력
-                TableCalendar(
-                  firstDay: DateTime.utc(2010, 10, 16),
-                  lastDay: DateTime.utc(2030, 3, 14),
-                  focusedDay: selectedDate,
-                  calendarFormat: calendarFormat,
-                  onFormatChanged: (format) {
-                    // 달력 형식 변경
-                    setState(() {
-                      calendarFormat = format;
-                    });
-                  },
-                  eventLoader: (date) {
-                    // 각 날짜에 해당하는 diaryList 보여주기
-                    return diaryService.getByDate(date);
-                  },
-                  calendarStyle: CalendarStyle(
-                    // today 색상 제거
-                    todayTextStyle: TextStyle(color: Colors.black),
-                    todayDecoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  selectedDayPredicate: (day) {
-                    return isSameDay(selectedDate, day);
-                  },
-                  onDaySelected: (_, focusedDay) {
-                    setState(() {
-                      selectedDate = focusedDay;
-                    });
-                  },
-                ),
-                Divider(height: 1),
-
-                /// 선택한 날짜의 일기 목록
-                Expanded(
-                  child: diaryList.isEmpty
-                      ? Center(
-                          child: Text(
-                            "한 줄 일기를 작성해주세요.",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 18,
-                            ),
-                          ),
-                        )
-                      : ListView.separated(
-                          itemCount: diaryList.length,
-                          itemBuilder: (context, index) {
-                            // 역순으로 보여주기
-                            int i = diaryList.length - index - 1;
-                            Diary diary = diaryList[i];
-                            return ListTile(
-                              /// text
-                              title: Text(
-                                diary.text,
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  color: Colors.black,
-                                ),
-                              ),
-
-                              /// createdAt
-                              trailing: Text(
-                                DateFormat('kk:mm').format(diary.createdAt),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-
-                              /// 클릭하여 update
-                              onTap: () {
-                                showUpdateDialog(diaryService, diary);
-                              },
-
-                              /// 꾹 누르면 delete
-                              onLongPress: () {
-                                showDeleteDialog(diaryService, diary);
-                              },
-                            );
-                          },
-                          separatorBuilder: (BuildContext context, int index) {
-                            // item 사이에 Divider 추가
-                            return Divider(height: 1);
-                          },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          // 로그아웃
+                          context.read<AuthService>().signOut();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginPage()),
+                          );
+                        },
+                        child: Text(
+                          '로그아웃',
+                          style: TextStyle(color: Colors.grey),
                         ),
-                ),
-              ],
+                      ),
+                    ],
+                  ),
+
+                  /// 달력
+                  TableCalendar(
+                    firstDay: DateTime.utc(2010, 10, 16),
+                    lastDay: DateTime.utc(2030, 3, 14),
+                    focusedDay: selectedDate,
+                    calendarFormat: calendarFormat,
+                    onFormatChanged: (format) {
+                      // 달력 형식 변경
+                      setState(() {
+                        calendarFormat = format;
+                      });
+                    },
+                    eventLoader: (date) {
+                      // 각 날짜에 해당하는 diaryList 보여주기
+                      return diaryService.getByDate(date);
+                    },
+                    calendarStyle: CalendarStyle(
+                      // today 색상 제거
+                      todayTextStyle: TextStyle(color: Colors.black),
+                      todayDecoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    selectedDayPredicate: (day) {
+                      return isSameDay(selectedDate, day);
+                    },
+                    onDaySelected: (_, focusedDay) {
+                      setState(() {
+                        selectedDate = focusedDay;
+                      });
+                    },
+                  ),
+                  Divider(height: 1),
+
+                  /// 선택한 날짜의 일기 목록
+                  Expanded(
+                    child: diaryList.isEmpty
+                        ? Center(
+                            child: Text(
+                              "한 줄 일기를 작성해주세요.",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 18,
+                              ),
+                            ),
+                          )
+                        : ListView.separated(
+                            itemCount: diaryList.length,
+                            itemBuilder: (context, index) {
+                              // 역순으로 보여주기
+                              int i = diaryList.length - index - 1;
+                              Diary diary = diaryList[i];
+                              return ListTile(
+                                /// text
+                                title: Text(
+                                  diary.text,
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    color: Colors.black,
+                                  ),
+                                ),
+
+                                /// createdAt
+                                trailing: Text(
+                                  DateFormat('kk:mm').format(diary.createdAt),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+
+                                /// 클릭하여 update
+                                onTap: () {
+                                  showUpdateDialog(diaryService, diary);
+                                },
+
+                                /// 꾹 누르면 delete
+                                onLongPress: () {
+                                  showDeleteDialog(diaryService, diary);
+                                },
+                              );
+                            },
+                            separatorBuilder:
+                                (BuildContext context, int index) {
+                              // item 사이에 Divider 추가
+                              return Divider(height: 1);
+                            },
+                          ),
+                  ),
+                ],
+              ),
             ),
           ),
 
