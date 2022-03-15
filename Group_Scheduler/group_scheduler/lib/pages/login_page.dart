@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:group_scheduler/pages/home_page.dart';
 import 'package:group_scheduler/services/auth_service.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +18,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Consumer<AuthService>(
       builder: (context, authService, child) {
+        // 유저 로그인정보 확인받아서 user변수에 할당
+        final user = authService.currentUser();
         return Scaffold(
           body: SafeArea(
             child: SizedBox(
@@ -74,12 +77,31 @@ class _LoginPageState extends State<LoginPage> {
                                   fontWeight: FontWeight.bold, fontSize: 20),
                             ),
                             onPressed: () {
-                              print('로그인');
-                              // 로그인 성공시 HomePage로 이동
-                              // Navigator.pushReplacement(
-                              //   context,
-                              //   MaterialPageRoute(builder: (_) => HomePage()),
-                              // );
+                              // 로그인
+                              authService.signIn(
+                                email: emailController.text,
+                                password: passwordController.text,
+                                onSuccess: () {
+                                  // 로그인 성공
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content: Text("로그인 성공"),
+                                  ));
+
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => HomePage()),
+                                  );
+                                },
+                                onError: (err) {
+                                  // 에러 발생
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content: Text(err),
+                                  ));
+                                },
+                              );
                             },
                           ),
                         ),
