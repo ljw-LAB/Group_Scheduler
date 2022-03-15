@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>448033299719-m6nj82jl0cklich0ls95ds3d4u2rv1oh.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.448033299719-m6nj82jl0cklich0ls95ds3d4u2rv1oh</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBnAb9JUMzxgzy88iAYO-oNDnfxH2dFeJQ</string>
+	<key>GCM_SENDER_ID</key>
+	<string>448033299719</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.groupScheduler</string>
+	<key>PROJECT_ID</key>
+	<string>group-schedular</string>
+	<key>STORAGE_BUCKET</key>
+	<string>group-schedular.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:448033299719:ios:e97548844b48e9fd7679a2</string>
+</dict>
+</plist>
