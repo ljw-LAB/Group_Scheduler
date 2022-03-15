@@ -3,14 +3,24 @@ import 'package:flutter/material.dart';
 
 // Pages - 자체 제작 페이지들
 import 'package:group_scheduler/pages/login_page.dart';
+import 'package:group_scheduler/pages/register_page.dart';
+import 'package:group_scheduler/pages/home_page.dart';
+
+// 자체 제작 서비스들
+import 'package:group_scheduler/services/diary_service.dart';
 
 // 3rd Party Packages - 외부 패키지들
-import 'package:intl/intl.dart'; // DateTime 형식 지정 외부 패키지
 import 'package:provider/provider.dart'; // 프로바이더
-import 'package:table_calendar/table_calendar.dart'; // 테이블 캘린더
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => DiaryService()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -20,7 +30,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: HomePage(),
     );
   }
 }
