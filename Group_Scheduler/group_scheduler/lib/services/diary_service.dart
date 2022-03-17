@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -61,5 +62,31 @@ class DiaryService extends ChangeNotifier {
     // createdAt이 일치하는 diary 삭제
     diaryList.removeWhere((diary) => diary.createdAt == createdAt);
     notifyListeners();
+  }
+
+  // 파이어베이스기반 코드
+  final bucketCollection = FirebaseFirestore.instance.collection('bucket');
+
+  Future<QuerySnapshot> read(String uid) async {
+    // 내 bucketList 가져오기
+    throw UnimplementedError(); // return 값 미구현 에러
+  }
+
+  void fbCreate(String text, String uid, DateTime createdAt) async {
+    print(text);
+    // bucket 만들기
+    await bucketCollection.add({
+      'uid': uid, // 유저 식별자
+      'text': text, // 일기내용
+      'createdAt': createdAt, // 일기내용
+    });
+  }
+
+  void fbUpdate(String docId, bool isDone) async {
+    // bucket isDone 업데이트
+  }
+
+  void fbDelete(String docId) async {
+    // bucket 삭제
   }
 }

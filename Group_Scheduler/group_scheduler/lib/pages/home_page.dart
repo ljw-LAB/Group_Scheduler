@@ -6,6 +6,9 @@ import 'package:group_scheduler/services/auth_service.dart';
 // 자체제작 서비스
 import 'package:group_scheduler/services/diary_service.dart';
 
+// 자체제작 컴포넌트
+// import 'package:group_scheduler/components/calendar.dart';
+
 // 3rd Party Packages - 외부 패키지들
 import 'package:table_calendar/table_calendar.dart'; // 테이블 캘린더
 import 'package:intl/intl.dart'; // DateTime 형식 지정 외부 패키지
@@ -33,6 +36,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = context.read<AuthService>();
+    final user = authService.currentUser()!;
     return Consumer<DiaryService>(
       builder: (context, diaryService, child) {
         List<Diary> diaryList = diaryService.getByDate(selectedDate);
@@ -66,6 +71,7 @@ class _HomePageState extends State<HomePage> {
                   ),
 
                   /// 달력
+
                   TableCalendar(
                     firstDay: DateTime.utc(2010, 10, 16),
                     lastDay: DateTime.utc(2030, 3, 14),
@@ -85,8 +91,8 @@ class _HomePageState extends State<HomePage> {
                       // today 색상 제거
                       todayTextStyle: TextStyle(color: Colors.black),
                       todayDecoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+                        color: Colors.grey,
+                        shape: BoxShape.rectangle,
                       ),
                     ),
                     selectedDayPredicate: (day) {
@@ -98,6 +104,7 @@ class _HomePageState extends State<HomePage> {
                       });
                     },
                   ),
+
                   Divider(height: 1),
 
                   /// 선택한 날짜의 일기 목록
@@ -165,7 +172,7 @@ class _HomePageState extends State<HomePage> {
             child: Icon(Icons.create),
             backgroundColor: Colors.indigo,
             onPressed: () {
-              showCreateDialog(diaryService);
+              showCreateDialog(diaryService, user);
             },
           ),
         );
@@ -175,12 +182,13 @@ class _HomePageState extends State<HomePage> {
 
   /// 작성하기
   /// 엔터를 누르거나 작성 버튼을 누르는 경우 호출
-  void createDiary(DiaryService diaryService) {
+  void createDiary(DiaryService diaryService, user) {
     // 앞뒤 공백 삭제
     String newText = createTextController.text.trim();
     if (newText.isNotEmpty) {
       diaryService.create(newText, selectedDate);
       createTextController.text = "";
+      diaryService.fbCreate(newText, user.uid, selectedDate);
     }
   }
 
@@ -198,7 +206,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// 작성 다이얼로그 보여주기
-  void showCreateDialog(DiaryService diaryService) {
+  void showCreateDialog(DiaryService diaryService, user) {
     showDialog(
       context: context,
       builder: (context) {
@@ -218,7 +226,7 @@ class _HomePageState extends State<HomePage> {
             ),
             onSubmitted: (_) {
               // 엔터 누를 때 작성하기
-              createDiary(diaryService);
+              createDiary(diaryService, user);
               Navigator.pop(context);
             },
           ),
@@ -235,7 +243,7 @@ class _HomePageState extends State<HomePage> {
             /// 작성 버튼
             TextButton(
               onPressed: () {
-                createDiary(diaryService);
+                createDiary(diaryService, user);
                 Navigator.pop(context);
               },
               child: Text(
