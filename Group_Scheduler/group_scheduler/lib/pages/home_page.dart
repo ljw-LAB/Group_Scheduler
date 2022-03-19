@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     final user = authService.currentUser()!;
     return Consumer<DiaryService>(
       builder: (context, diaryService, child) {
-        List<Diary> diaryList = diaryService.getByDate(selectedDate, user.uid);
+        List<Diary> diaryList = diaryService.getByDate(selectedDate);
         return Scaffold(
           // 키보드가 올라올 때 화면 밀지 않도록 만들기(overflow 방지)
           resizeToAvoidBottomInset: false,
@@ -84,10 +84,10 @@ class _HomePageState extends State<HomePage> {
                         calendarFormat = format;
                       });
                     },
-                    // eventLoader: (date) {
-                    //   // 각 날짜에 해당하는 diaryList 보여주기
-                    //   return diaryService.getByDate(date, user.uid);
-                    // },
+                    eventLoader: (date) {
+                      // 각 날짜에 해당하는 diaryList 보여주기
+                      return diaryService.getByDate(date);
+                    },
                     calendarStyle: CalendarStyle(
                       // today 색상 제거
                       todayTextStyle: TextStyle(color: Colors.black),
@@ -110,7 +110,7 @@ class _HomePageState extends State<HomePage> {
 
                   /// 선택한 날짜의 일기 목록
                   Expanded(
-                    child: diaryList.length != 0
+                    child: diaryList.isEmpty
                         ? Center(
                             child: Text(
                               "한 줄 일기를 작성해주세요.",
@@ -120,57 +120,52 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           )
-                        : FutureBuilder<QuerySnapshot>(
-                            future: diaryService.fbRead(user.uid),
-                            builder: (context, snapshot) {
-                              final docs =
-                                  snapshot.data?.docs ?? []; // 문서들 가져오기
-                              return ListView.separated(
-                                itemCount: docs.length,
-                                itemBuilder: (context, index) {
-                                  // 역순으로 보여주기
-                                  int i = docs.length - index - 1;
-                                  final doc = docs[index];
-                                  String text = doc.get('text');
-                                  DateTime createdAt = doc.get('createdAd');
+                        : ListView.separated(
+                            itemCount: diaryList.length,
+                            itemBuilder: (context, index) {
+                              // 역순으로 보여주기
+                              int i = diaryList.length - index - 1;
+                              final doc = diaryList[index];
+                              String text = diaryList[index].text ?? '';
+                              DateTime createdAt =
+                                  diaryList[index].createdAt ?? DateTime.now();
+                              print(createdAt);
+                              return ListTile(
+                                /// text
+                                title: Text(
+                                  text,
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    color: Colors.black,
+                                  ),
+                                ),
 
-                                  return ListTile(
-                                    /// text
-                                    title: Text(
-                                      text,
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        color: Colors.black,
-                                      ),
-                                    ),
+                                /// createdAt
+                                trailing: Text(
+                                  DateFormat('kk:mm').format(createdAt),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
 
-                                    /// createdAt
-                                    trailing: Text(
-                                      DateFormat('kk:mm').format(createdAt),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-
-                                    /// 클릭하여 update
-                                    onTap: () {
-                                      // showUpdateDialog(diaryService, diary);
-                                    },
-
-                                    /// 꾹 누르면 delete
-                                    onLongPress: () {
-                                      // showDeleteDialog(diaryService, diary);
-                                    },
-                                  );
+                                /// 클릭하여 update
+                                onTap: () {
+                                  // showUpdateDialog(diaryService, diary);
                                 },
-                                separatorBuilder:
-                                    (BuildContext context, int index) {
-                                  // item 사이에 Divider 추가
-                                  return Divider(height: 1);
+
+                                /// 꾹 누르면 delete
+                                onLongPress: () {
+                                  // showDeleteDialog(diaryService, diary);
                                 },
                               );
-                            }),
+                            },
+                            separatorBuilder:
+                                (BuildContext context, int index) {
+                              // item 사이에 Divider 추가
+                              return Divider(height: 1);
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -209,7 +204,7 @@ class _HomePageState extends State<HomePage> {
     String updatedText = updateTextController.text.trim();
     if (updatedText.isNotEmpty) {
       diaryService.update(
-        diary.createdAt,
+        diary.createdAt ?? DateTime.now(),
         updatedText,
       );
     }
@@ -272,7 +267,7 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (context) {
-        updateTextController.text = diary.text;
+        updateTextController.text = diary.text ?? '';
         return AlertDialog(
           title: Text("일기 수정"),
           content: TextField(
@@ -332,7 +327,7 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (context) {
-        updateTextController.text = diary.text;
+        updateTextController.text = diary.text ?? '';
         return AlertDialog(
           title: Text("일기 삭제"),
           content: Text('"${diary.text}"를 삭제하시겠습니까?'),
@@ -358,7 +353,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               onPressed: () {
-                diaryService.delete(diary.createdAt);
+                diaryService.delete(diary.createdAt ?? DateTime.now());
                 Navigator.pop(context);
               },
             ),
