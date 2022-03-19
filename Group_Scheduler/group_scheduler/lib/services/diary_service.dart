@@ -3,21 +3,35 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class Diary {
+  String uid;
   String text; // 내용
   DateTime createdAt; // 작성 시간
 
   Diary({
+    required this.uid,
     required this.text,
     required this.createdAt,
   });
 }
 
 class DiaryService extends ChangeNotifier {
+  // 파이어베이스기반 코드
+  final bucketCollection = FirebaseFirestore.instance.collection('bucket');
+
   /// Diary 목록
   List<Diary> diaryList = [];
 
   /// 특정 날짜의 diary 조회
-  List<Diary> getByDate(DateTime date) {
+  List<Diary> getByDate(DateTime date, String uid) {
+    // 파이어베이스 가장 위에있는 데이터 불러오는 코드
+    bucketCollection.get().then((value) {
+      value.docs.forEach((element) {
+        print(element.data());
+      });
+    });
+
+    // return bucketCollection.where('uid', isEqualTo: uid).get();
+
     return diaryList
         .where((diary) => isSameDay(date, diary.createdAt))
         .toList();
@@ -37,11 +51,12 @@ class DiaryService extends ChangeNotifier {
       now.second,
     );
 
-    Diary diary = Diary(
-      text: text,
-      createdAt: createdAt,
-    );
-    diaryList.add(diary);
+    // Diary diary = Diary(
+    //   uid: uid,
+    //   text: text,
+    //   createdAt: createdAt,
+    // );
+    // diaryList.add(diary);
     notifyListeners();
   }
 
@@ -64,16 +79,16 @@ class DiaryService extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 파이어베이스기반 코드
-  final bucketCollection = FirebaseFirestore.instance.collection('bucket');
-
-  Future<QuerySnapshot> read(String uid) async {
+  Future<QuerySnapshot> fbRead(String uid) async {
     // 내 bucketList 가져오기
+    return bucketCollection.where('uid', isEqualTo: uid).get();
+
     throw UnimplementedError(); // return 값 미구현 에러
   }
 
   void fbCreate(String text, String uid, DateTime createdAt) async {
     print(text);
+
     // bucket 만들기
     await bucketCollection.add({
       'uid': uid, // 유저 식별자

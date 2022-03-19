@@ -1,9 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:group_scheduler/pages/login_page.dart';
-import 'package:group_scheduler/services/auth_service.dart';
 
 // 자체제작 서비스
+import 'package:group_scheduler/services/auth_service.dart';
 import 'package:group_scheduler/services/diary_service.dart';
 
 // 자체제작 컴포넌트
@@ -40,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     final user = authService.currentUser()!;
     return Consumer<DiaryService>(
       builder: (context, diaryService, child) {
-        List<Diary> diaryList = diaryService.getByDate(selectedDate);
+        List<Diary> diaryList = diaryService.getByDate(selectedDate, user.uid);
         return Scaffold(
           // 키보드가 올라올 때 화면 밀지 않도록 만들기(overflow 방지)
           resizeToAvoidBottomInset: false,
@@ -83,10 +84,10 @@ class _HomePageState extends State<HomePage> {
                         calendarFormat = format;
                       });
                     },
-                    eventLoader: (date) {
-                      // 각 날짜에 해당하는 diaryList 보여주기
-                      return diaryService.getByDate(date);
-                    },
+                    // eventLoader: (date) {
+                    //   // 각 날짜에 해당하는 diaryList 보여주기
+                    //   return diaryService.getByDate(date, user.uid);
+                    // },
                     calendarStyle: CalendarStyle(
                       // today 색상 제거
                       todayTextStyle: TextStyle(color: Colors.black),
@@ -109,7 +110,7 @@ class _HomePageState extends State<HomePage> {
 
                   /// 선택한 날짜의 일기 목록
                   Expanded(
-                    child: diaryList.isEmpty
+                    child: diaryList.length != 0
                         ? Center(
                             child: Text(
                               "한 줄 일기를 작성해주세요.",
@@ -119,48 +120,57 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           )
-                        : ListView.separated(
-                            itemCount: diaryList.length,
-                            itemBuilder: (context, index) {
-                              // 역순으로 보여주기
-                              int i = diaryList.length - index - 1;
-                              Diary diary = diaryList[i];
-                              return ListTile(
-                                /// text
-                                title: Text(
-                                  diary.text,
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    color: Colors.black,
-                                  ),
-                                ),
+                        : FutureBuilder<QuerySnapshot>(
+                            future: diaryService.fbRead(user.uid),
+                            builder: (context, snapshot) {
+                              final docs =
+                                  snapshot.data?.docs ?? []; // 문서들 가져오기
+                              return ListView.separated(
+                                itemCount: docs.length,
+                                itemBuilder: (context, index) {
+                                  // 역순으로 보여주기
+                                  int i = docs.length - index - 1;
+                                  final doc = docs[index];
+                                  String text = doc.get('text');
+                                  DateTime createdAt = doc.get('createdAd');
 
-                                /// createdAt
-                                trailing: Text(
-                                  DateFormat('kk:mm').format(diary.createdAt),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                ),
+                                  return ListTile(
+                                    /// text
+                                    title: Text(
+                                      text,
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        color: Colors.black,
+                                      ),
+                                    ),
 
-                                /// 클릭하여 update
-                                onTap: () {
-                                  showUpdateDialog(diaryService, diary);
+                                    /// createdAt
+                                    trailing: Text(
+                                      DateFormat('kk:mm').format(createdAt),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+
+                                    /// 클릭하여 update
+                                    onTap: () {
+                                      // showUpdateDialog(diaryService, diary);
+                                    },
+
+                                    /// 꾹 누르면 delete
+                                    onLongPress: () {
+                                      // showDeleteDialog(diaryService, diary);
+                                    },
+                                  );
                                 },
-
-                                /// 꾹 누르면 delete
-                                onLongPress: () {
-                                  showDeleteDialog(diaryService, diary);
+                                separatorBuilder:
+                                    (BuildContext context, int index) {
+                                  // item 사이에 Divider 추가
+                                  return Divider(height: 1);
                                 },
                               );
-                            },
-                            separatorBuilder:
-                                (BuildContext context, int index) {
-                              // item 사이에 Divider 추가
-                              return Divider(height: 1);
-                            },
-                          ),
+                            }),
                   ),
                 ],
               ),
@@ -186,7 +196,7 @@ class _HomePageState extends State<HomePage> {
     // 앞뒤 공백 삭제
     String newText = createTextController.text.trim();
     if (newText.isNotEmpty) {
-      diaryService.create(newText, selectedDate);
+      // diaryService.create(newText, selectedDate);
       createTextController.text = "";
       diaryService.fbCreate(newText, user.uid, selectedDate);
     }

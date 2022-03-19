@@ -6,7 +6,6 @@ import 'package:group_scheduler/pages/login_page.dart';
 import 'package:group_scheduler/pages/register_page.dart';
 import 'package:group_scheduler/pages/home_page.dart';
 import 'package:group_scheduler/services/auth_service.dart';
-import 'package:group_scheduler/services/bucket_service.dart';
 
 // 자체 제작 서비스들
 import 'package:group_scheduler/services/diary_service.dart';
@@ -23,7 +22,6 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => DiaryService()),
         ChangeNotifierProvider(create: (context) => AuthService()),
-        ChangeNotifierProvider(create: (context) => BucketService()),
       ],
       child: const MyApp(),
     ),
