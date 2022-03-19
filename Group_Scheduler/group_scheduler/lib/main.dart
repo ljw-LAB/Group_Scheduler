@@ -1,9 +1,31 @@
+// 플러터 코어파일
 import 'package:flutter/material.dart';
 
-//import 'miso.dart';
-// 수정 테스트
-void main() {
-  runApp(const MyApp());
+// Pages - 자체 제작 페이지들
+import 'package:group_scheduler/pages/login_page.dart';
+import 'package:group_scheduler/pages/register_page.dart';
+import 'package:group_scheduler/pages/home_page.dart';
+import 'package:group_scheduler/services/auth_service.dart';
+
+// 자체 제작 서비스들
+import 'package:group_scheduler/services/diary_service.dart';
+
+// 3rd Party Packages - 외부 패키지들
+import 'package:provider/provider.dart'; // 프로바이더
+import 'package:firebase_core/firebase_core.dart'; // 파이어베이스
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // main 함수에서 async 사용하기 위함
+  await Firebase.initializeApp();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => DiaryService()),
+        ChangeNotifierProvider(create: (context) => AuthService()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -11,9 +33,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.read<AuthService>().currentUser();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: user == null ? LoginPage() : HomePage(),
     );
   }
 }
@@ -21,108 +44,3 @@ class MyApp extends StatelessWidget {
 Color PrimaryColor = Color.fromARGB(255, 38, 103, 240);
 
 /// 두 번째 페이지
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SizedBox(
-          width: double.infinity,
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// Tip : 기기 높이의 %로 줘야 각 기기별로 적절한 위치에 배치할 수 있어요.
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-
-                    /// 예약내역
-                    Text(
-                      "Group Scheduler",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 32,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-
-                    /// 이메일
-                    TextField(
-                      //controller: emailController,
-                      decoration: InputDecoration(hintText: "이메일"),
-                    ),
-                    SizedBox(height: 32),
-
-                    /// 비밀번호
-                    TextField(
-                      //controller: passwordController,
-                      obscureText: false, // 비밀번호 안보이게
-                      decoration: InputDecoration(hintText: "비밀번호"),
-                    ),
-                    SizedBox(height: 32),
-
-                    SizedBox(
-                      width: double.infinity, // <-- match_parent
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                            shape: MaterialStateProperty.all<
-                                RoundedRectangleBorder>(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                        ))),
-
-                        /// 로그인 버튼
-                        child: Text(
-                          "로그인",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20),
-                        ),
-                        onPressed: () {
-                          // 로그인 성공시 HomePage로 이동
-                          // Navigator.pushReplacement(
-                          //   context,
-                          //   MaterialPageRoute(builder: (_) => HomePage()),
-                          // );
-                        },
-                      ),
-                    ),
-
-                    SizedBox(
-                      width: double.infinity, // <-- match_parent
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                            shape: MaterialStateProperty.all<
-                                RoundedRectangleBorder>(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                        ))),
-
-                        /// 회원가입 버튼
-                        child: Text(
-                          "회원가입",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20),
-                        ),
-                        onPressed: () {
-                          // 회원가입
-                          print("sign up");
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
