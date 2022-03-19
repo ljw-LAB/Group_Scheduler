@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "448033299719",
+    "project_id": "group-schedular",
+    "storage_bucket": "group-schedular.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:448033299719:android:79c470fe133450de7679a2",
+        "android_client_info": {
+          "package_name": "com.example.group_scheduler"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "448033299719-bogqm0s120ghb5k7ut4ba8umv59h2l65.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwlvKIyuLIxoUh-1PPD489jZXpAR2E4tg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "448033299719-bogqm0s120ghb5k7ut4ba8umv59h2l65.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "448033299719-m6nj82jl0cklich0ls95ds3d4u2rv1oh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.groupScheduler"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:group_scheduler/pages/home_page.dart';
 import 'package:group_scheduler/services/auth_service.dart';
+import 'package:group_scheduler/pages/register_page.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -124,23 +125,10 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             onPressed: () {
                               // 회원가입
-                              print('회원가입');
-                              authService.signUp(
-                                email: emailController.text,
-                                password: passwordController.text,
-                                onSuccess: () {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                    content: Text("회원가입 성공"),
-                                  ));
-                                },
-                                onError: (err) {
-                                  // 에러 발생
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                    content: Text(err),
-                                  ));
-                                },
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => RegisterPage()),
                               );
                             },
                           ),
