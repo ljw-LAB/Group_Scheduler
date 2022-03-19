@@ -44,8 +44,8 @@ class DiaryService extends ChangeNotifier {
         Diary diary = Diary.fbSerializer(element.data());
         diaryList.add(diary);
       });
+      notifyListeners();
     });
-    // inspect(diaryList);
   }
 
   /// 특정 날짜의 diary 조회

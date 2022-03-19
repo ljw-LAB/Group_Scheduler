@@ -39,27 +39,15 @@ class AuthService extends ChangeNotifier {
         password: password,
       );
 
-      try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-
-        onSuccess(); // 성공 함수 호출
-        print('호출완료!');
-        await bucketCollection.add({
-          'uid': currentUser()?.uid, // 유저 식별자
-          'nickname': nickName, // 닉네임
-        });
-        notifyListeners();
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => HomePage()));
-      } on FirebaseAuthException catch (e) {
-        onError(e.toString());
-      }
-
       // 성공 함수 호출
       onSuccess();
+      print('호출완료!');
+      await bucketCollection.add({
+        'uid': currentUser()?.uid, // 유저 식별자
+        'nickname': nickName, // 닉네임
+      });
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => HomePage()));
     } on FirebaseAuthException catch (e) {
       // Firebase auth 에러 발생
       if (e.code == 'weak-password') {
