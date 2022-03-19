@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'components/';
 
+//import 'miso.dart';
+// 수정 테스트
 void main() {
   runApp(const MyApp());
 }
