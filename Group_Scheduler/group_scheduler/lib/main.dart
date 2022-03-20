@@ -1,4 +1,4 @@
-// 플러터 코어파일
+// 플러터 코어파일입니다
 import 'package:flutter/material.dart';
 
 // Pages - 자체 제작 페이지들
