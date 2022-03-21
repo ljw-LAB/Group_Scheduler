@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:group_scheduler/pages/login_page.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 // 자체제작 서비스
 import 'package:group_scheduler/services/auth_service.dart';
@@ -14,6 +15,9 @@ import 'package:group_scheduler/services/diary_service.dart';
 import 'package:table_calendar/table_calendar.dart'; // 테이블 캘린더
 import 'package:intl/intl.dart'; // DateTime 형식 지정 외부 패키지
 import 'package:provider/provider.dart'; // 프로바이더
+
+// 한줄일기 내용 저장 변수
+late String diary_string;
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -34,6 +38,72 @@ class _HomePageState extends State<HomePage> {
 
   // update text controller
   TextEditingController updateTextController = TextEditingController();
+
+  // Notifications Plugin 생성
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    // 알림 초기화
+    init();
+  }
+
+  void init() async {
+    // 알림용 ICON 설정
+    // https://ichi.pro/ko/flutterlo-pusi-allim-eul-sayonghaneun-bangbeob-39302606388818 IOS, MAC OS 초기화 참조
+
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    final IOSInitializationSettings initializationSettingsIOS =
+        IOSInitializationSettings(onDidReceiveLocalNotification: null);
+    final MacOSInitializationSettings initializationSettingsMacOS =
+        MacOSInitializationSettings();
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
+            android: initializationSettingsAndroid,
+            iOS: initializationSettingsIOS,
+            macOS: initializationSettingsMacOS);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+    // final InitializationSettings initializationSettings =
+    //     InitializationSettings(android: initializationSettingsAndroid);
+
+    // // 알림 초기화
+    // await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  // 알림 발생 함수!!
+  Future<void> _showGroupedNotifications() async {
+    // 알림 그룹 키
+    const String groupKey = 'com.example.group_scheduler';
+    // 알림 채널
+    const String groupChannelId = 'grouped channel id';
+    // 채널 이름
+    const String groupChannelName = 'grouped channel name';
+
+    // 채널 설명
+    //const String groupChannelDescription = 'grouped channel description';
+
+    // 안드로이드 알림 설정
+    const AndroidNotificationDetails notificationAndroidSpecifics =
+        AndroidNotificationDetails(groupChannelId, groupChannelName,
+            importance: Importance.max,
+            priority: Priority.high,
+            groupKey: groupKey);
+
+    // 플랫폼별 설정 - 현재 안드로이드만 적용됨
+    const NotificationDetails notificationPlatformSpecifics =
+        NotificationDetails(android: notificationAndroidSpecifics);
+
+    // 알림 발생!
+    await flutterLocalNotificationsPlugin.show(
+        1,
+        'Group_scheduler ${DateFormat('yy/MM/dd').format(selectedDate)}',
+        diary_string,
+        notificationPlatformSpecifics);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -194,6 +264,7 @@ class _HomePageState extends State<HomePage> {
       // diaryService.create(newText, selectedDate);
       createTextController.text = "";
       diaryService.fbCreate(newText, user.uid, selectedDate);
+      diary_string = newText;
     }
   }
 
@@ -248,7 +319,9 @@ class _HomePageState extends State<HomePage> {
             /// 작성 버튼
             TextButton(
               onPressed: () {
+                print("작성");
                 createDiary(diaryService, user);
+                _showGroupedNotifications();
                 Navigator.pop(context);
               },
               child: Text(

@@ -6,6 +6,7 @@ import 'package:group_scheduler/pages/login_page.dart';
 import 'package:group_scheduler/pages/register_page.dart';
 import 'package:group_scheduler/pages/home_page.dart';
 import 'package:group_scheduler/services/auth_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 // 자체 제작 서비스들
 import 'package:group_scheduler/services/diary_service.dart';
