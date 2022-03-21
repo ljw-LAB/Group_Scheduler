@@ -62,7 +62,6 @@ class DiaryService extends ChangeNotifier {
   /// Diary 수정
   void update(Diary diary, String newContent) async {
     // docId로 데이터 조회 및 업데이트
-    // Diary diary = diaryList.firstWhere((diary) => diary.createdAt == createdAt);
     print(diary.docId);
     await bucketCollection.doc(diary.docId).update({'text': newContent});
 
@@ -71,10 +70,12 @@ class DiaryService extends ChangeNotifier {
   }
 
   /// Diary 삭제
-  void delete(DateTime createdAt) {
-    // createdAt은 중복될 일이 없기 때문에 createdAt을 고유 식별자로 사용
-    // createdAt이 일치하는 diary 삭제
-    diaryList.removeWhere((diary) => diary.createdAt == createdAt);
+  void delete(Diary diary) async {
+    // docId로 데이터 조회 및 삭제
+    await bucketCollection.doc(diary.docId).delete();
+
+    // 다이어리 리스트에서도 삭제
+    diaryList.remove(diary);
     notifyListeners();
   }
 
