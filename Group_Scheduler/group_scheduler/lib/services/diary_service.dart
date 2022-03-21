@@ -5,17 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class Diary {
-  String? uid;
+  String? docId; // 도큐먼트 아이디
+  String? uid; // 유저 uid
   String? text; // 내용
   DateTime? createdAt; // 작성 시간
 
   Diary({
+    required this.docId,
     required this.uid,
     required this.text,
     required this.createdAt,
   });
 
-  Diary.fbSerializer(Map<String, dynamic> json) {
+  Diary.fbSerializer(Map<String, dynamic> json, String documentId) {
+    docId = documentId;
     uid = json['uid'];
     text = json['text'];
     createdAt = DateTime.tryParse(json['createdAt']);
@@ -25,23 +28,24 @@ class Diary {
   Map<String, dynamic> toJson() {
     return {
       "text": text,
-      // DateTime은 문자열로 변경해야 jsonString으로 변환 가능합니다.
+      // DateTime은 문자열로 변경해야 jsonString으로 변환 가능.
       "createdAt": createdAt?.toIso8601String(),
     };
   }
 }
 
 class DiaryService extends ChangeNotifier {
-  // 파이어베이스기반 코드
+  // 파이어베이스 bucket 컬렉션을 선택
   final bucketCollection = FirebaseFirestore.instance.collection('bucket');
 
-  /// Diary 목록
+  /// diaryList 빈 목록 생성
   List<Diary> diaryList = [];
 
+  // 파이어베이스에 있는 전체 도큐먼트 호출 및 diaryList에 추가
   DiaryService() {
     bucketCollection.get().then((value) {
       value.docs.forEach((element) {
-        Diary diary = Diary.fbSerializer(element.data());
+        Diary diary = Diary.fbSerializer(element.data(), element.id);
         diaryList.add(diary);
       });
       notifyListeners();
@@ -50,23 +54,18 @@ class DiaryService extends ChangeNotifier {
 
   /// 특정 날짜의 diary 조회
   List<Diary> getByDate(DateTime date) {
-    // 파이어베이스 가장 위에있는 데이터 불러오는 코드
-
-    // return bucketCollection.where('uid', isEqualTo: uid).get();
-
-    // inspect(diaryList);
     return diaryList
         .where((diary) => isSameDay(date, diary.createdAt))
         .toList();
   }
 
   /// Diary 수정
-  void update(DateTime createdAt, String newContent) {
-    // createdAt은 중복될 일이 없기 때문에 createdAt을 고유 식별자로 사용
-    // createdAt이 일치하는 diary 조회
-    Diary diary = diaryList.firstWhere((diary) => diary.createdAt == createdAt);
+  void update(Diary diary, String newContent) async {
+    // docId로 데이터 조회 및 업데이트
+    // Diary diary = diaryList.firstWhere((diary) => diary.createdAt == createdAt);
+    print(diary.docId);
+    await bucketCollection.doc(diary.docId).update({'text': newContent});
 
-    // text 수정
     diary.text = newContent;
     notifyListeners();
   }
@@ -77,13 +76,6 @@ class DiaryService extends ChangeNotifier {
     // createdAt이 일치하는 diary 삭제
     diaryList.removeWhere((diary) => diary.createdAt == createdAt);
     notifyListeners();
-  }
-
-  Future<QuerySnapshot> fbRead(String uid) async {
-    // 내 bucketList 가져오기
-    return bucketCollection.where('uid', isEqualTo: uid).get();
-
-    throw UnimplementedError(); // return 값 미구현 에러
   }
 
   void fbCreate(String text, String uid, DateTime createdAt) async {
@@ -105,15 +97,11 @@ class DiaryService extends ChangeNotifier {
       'createdAt': now_time.toIso8601String(), // 일기내용
     });
 
-    Diary now_added = Diary(uid: uid, text: text, createdAt: now_time);
+    Diary now_added = Diary(
+        uid: uid,
+        text: text,
+        createdAt: now_time,
+        docId: bucketCollection.doc().id);
     diaryList.add(now_added);
-  }
-
-  void fbUpdate(String docId, bool isDone) async {
-    // bucket isDone 업데이트
-  }
-
-  void fbDelete(String docId) async {
-    // bucket 삭제
   }
 }
