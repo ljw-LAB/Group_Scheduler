@@ -199,7 +199,6 @@ class _HomePageState extends State<HomePage> {
                               String text = diaryList[index].text ?? '';
                               DateTime createdAt =
                                   diaryList[index].createdAt ?? DateTime.now();
-                              print(createdAt);
                               return ListTile(
                                 /// text
                                 title: Text(
@@ -221,12 +220,12 @@ class _HomePageState extends State<HomePage> {
 
                                 /// 클릭하여 update
                                 onTap: () {
-                                  // showUpdateDialog(diaryService, diary);
+                                  showUpdateDialog(diaryService, doc);
                                 },
 
                                 /// 꾹 누르면 delete
                                 onLongPress: () {
-                                  // showDeleteDialog(diaryService, diary);
+                                  showDeleteDialog(diaryService, doc);
                                 },
                               );
                             },
@@ -274,8 +273,9 @@ class _HomePageState extends State<HomePage> {
     // 앞뒤 공백 삭제
     String updatedText = updateTextController.text.trim();
     if (updatedText.isNotEmpty) {
+      print(diary.docId);
       diaryService.update(
-        diary.createdAt ?? DateTime.now(),
+        diary,
         updatedText,
       );
     }
@@ -426,7 +426,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               onPressed: () {
-                diaryService.delete(diary.createdAt ?? DateTime.now());
+                diaryService.delete(diary);
                 Navigator.pop(context);
               },
             ),
